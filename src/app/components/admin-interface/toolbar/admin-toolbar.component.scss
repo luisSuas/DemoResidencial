@@ -1,0 +1,20 @@
+:host {
+    position: absolute;
+    top: calc(10px + var(--ion-safe-area-top));
+    height: 44px;
+    width: 100%;
+
+    padding-right: 10px;
+    padding-left: 10px;
+
+    div {
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        gap: 10px;
+    }
+}
+
+.spacer {
+    flex-grow: 1;
+}

@@ -1,0 +1,43 @@
+.custom-title {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 10px;
+    padding: 20px;
+
+    img {
+        margin: auto;
+        width: 150px;
+        height: auto;
+    }
+}
+
+ion-split-pane {
+    --side-width: 350px;
+    --side-max-width: 350px;
+}
+
+ion-router-outlet {
+    top: calc(56px + var(--ion-safe-area-top));
+}
+
+ion-list.menu {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    --background: transparent;
+    background: transparent;
+    width: calc(100% - 20px);
+    margin-left: 10px;
+
+    ion-item {
+        --background: var(--ion-card-background);
+        --border-radius: 20px;
+
+        &.active {
+            --background: var(--ion-color-primary);
+            --color: var(--ion-color-primary-contrast);
+        }
+    }
+}

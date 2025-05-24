@@ -1,0 +1,133 @@
+<form [formGroup]="reactiveForm" #form="ngForm" (ngSubmit)="action()">
+  <ion-list class="form" mode="md" [inset]="true">
+    @for (field of fieldsToShow(); track field.key) {
+    @switch (field.type) {
+    @case (inputTypes.String) {
+
+    <ion-input [label]="field.label" [placeholder]="field.placeholder || 'Escribe aquí'"
+      [readonly]="field.editable === false && isUpdating()" [formControlName]="$any(field.key)"
+      [helperText]="field.helperText" [required]="field.required" label-placement="floating" fill="outline"
+      [type]="field.textFieldType" [errorText]="errorText(getControl($any(field.key)))">
+    </ion-input>
+    }
+    <!-- @case (inputTypes.String) {
+    <ion-textarea [label]="field.label" [placeholder]="field.placeholder || 'Escribe aquí'"
+      [formControlName]="field.key" [required]="field.required" label-placement="floating" fill="outline">
+    </ion-textarea>
+    } -->
+    @case (inputTypes.Number){
+    <ion-input [label]="field.label" [placeholder]="field.placeholder || 'Ingrese un número'"
+      [helperText]="field.helperText" [readonly]="field.editable === false && isUpdating()"
+      [formControlName]="$any(field.key)" [required]="field.required" label-placement="floating" fill="outline"
+      type="number" [errorText]="errorText(getControl($any(field.key)))">
+    </ion-input>
+    }
+
+    @case (inputTypes.Date) {
+    <ion-item fill="full" class="my-2">
+      <ion-label>{{field.label}}</ion-label>
+      <ion-datetime-button [datetime]="field.key"></ion-datetime-button>
+      <ion-modal [keepContentsMounted]="true">
+        <ng-template>
+          <ion-datetime presentation="date-time" hourCycle="h23" [preferWheel]="true" [minuteValues]="[0, 15, 30]"
+            [name]="field.key" (ionChange)="dateTimeChange($event, $any(field.key))" [id]="field.key"></ion-datetime>
+        </ng-template>
+      </ion-modal>
+    </ion-item>
+    }
+
+    @case (inputTypes.Select) {
+    <ion-select [label]="field.label" [placeholder]="field.placeholder" fill="outline"
+      [formControlName]="$any(field.key)" [multiple]="field.multiple" [required]="field.required">
+      @for (option of field.options; track option.value) {
+      <ion-select-option [value]="option.value || option.label">
+        {{option.label}}
+      </ion-select-option>
+      }
+    </ion-select>
+    }
+
+    @case (inputTypes.Image) {
+    <ion-item fill="outline" class="my-2">
+      <ion-label>{{field.label}}</ion-label>
+      <ion-button fill="outline" color="primary" (click)="openImagePicker($any(field.key), field.formatsAccepted)">
+        <ion-icon slot="icon-only" name="camera"></ion-icon>
+      </ion-button>
+      @if (uploadedPhotos[$any(field.key)]) {
+      <ion-avatar (click)="openImagePicked(uploadedPhotos[$any(field.key)])" slot="start">
+        <img alt="" [src]="uploadedPhotos[$any(field.key)]" />
+      </ion-avatar>
+      }
+    </ion-item>
+    }
+
+    @case (inputTypes.File) {
+    <ion-item fill="outline" class="my-2">
+      <ion-label>{{field.label}}</ion-label>
+      <ion-button fill="outline" color="primary" (click)="openFilePicker($any(field.key))">
+        Upload file
+      </ion-button>
+
+      <input #fileInput [id]="field.key" style="display: none;" type="file" [formControlName]="$any(field.key)"
+        (change)="saveFile($event, $any(field.key))">
+      @if (reactiveForm.controls[$any(field.key)].value) {
+      <ion-chip slot="end" (click)="seeFile(reactiveForm.controls[$any(field.key)].value)">
+        See file
+      </ion-chip>
+      }
+    </ion-item>
+
+    }
+
+    <!-- <ng-container *ngSwitchCase="inputTypes.DateTime">
+      <ion-item fill="outline" class="my-2">
+        <ion-label>{{field.label}}</ion-label>
+        <ion-datetime-button [datetime]="field.key"></ion-datetime-button>
+        <ion-modal [keepContentsMounted]="true">
+          <ng-template>
+            <ion-datetime [id]="field.key"></ion-datetime>
+          </ng-template>
+        </ion-modal>
+      </ion-item>
+    </ng-container>
+
+    <ng-container *ngSwitchCase="inputTypes.Select">
+      <ion-select [label]="field.label" [placeholder]="field.placeholder" fill="outline"
+        [formControlName]="field.key" [multiple]="field.multiple" [required]="field.required">
+        <ion-select-option *ngFor="let option of field.options" [value]="option.value || option.label">
+          {{option.label}}
+        </ion-select-option>
+        <ion-select-option [value]="null">No aplica</ion-select-option>
+      </ion-select>
+    </ng-container>
+
+    <ng-container *ngSwitchCase="inputTypes.Radio">
+      <ion-radio-group [allowEmptySelection]="!field.required" [required]="field.required"
+        [formControlName]="field.key">
+        <ion-radio *ngFor="let option of field.options" [value]="option.value || option.label">
+          {{option.label}}
+        </ion-radio><br />
+      </ion-radio-group>
+    </ng-container>
+
+    <ng-container *ngSwitchCase="inputTypes.Checkbox">
+      <ion-radio-group [allowEmptySelection]="!field.required" [required]="field.required"
+        [formControlName]="field.key">
+        <ion-radio *ngFor="let option of field.options" [value]="option.value || option.label">
+          {{option.label}}
+        </ion-radio><br />
+      </ion-radio-group>
+    </ng-container> -->
+
+    }
+    }
+  </ion-list>
+  <ion-button [disabled]="reactiveForm .invalid || processInProgress()" type="submit" expand="full" size="default"
+    fill="solid" color="primary" mode="ios" shape="round">
+    @if (processInProgress()) {
+    <ion-spinner name="dots"></ion-spinner>
+    } @else {
+    Accept
+    }
+  </ion-button>
+</form>

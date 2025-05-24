@@ -1,0 +1,28 @@
+@import "../../../theme/ionlistWithForm.scss";
+@import "../../../theme/heightWidth.utilities.scss";
+
+.blue-card {
+    background-color: var(--ion-color-primary);
+    height: 100;
+}
+
+.login-card {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    form {
+        padding: 20px;
+    }
+}
+
+img.principal {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    right: 0;
+    bottom: 0;
+    width: 176px;
+    height: 44px;
+}

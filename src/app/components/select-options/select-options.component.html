@@ -1,0 +1,9 @@
+<ion-content>
+    <ion-list>
+        @for (option of options(); track option.value) {
+        <ion-item [button]="true" [detail]="false" (click)="select(option.value)">
+            {{option.label}}
+        </ion-item>
+        }
+    </ion-list>
+</ion-content>

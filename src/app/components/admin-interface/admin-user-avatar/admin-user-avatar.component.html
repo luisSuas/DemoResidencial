@@ -1,0 +1,16 @@
+<ion-chip id="open-popover-user-actions" (click)="openUserActions.set(true)">
+    @if(user$ | async; as userAsync){
+    <ion-avatar>
+        <img alt="Avatar del usuario administrador" [src]="displayImage()" />
+    </ion-avatar>
+    <ion-label class="ion-hide-md-down">
+        {{userAsync.email}}
+    </ion-label>
+    } @else {
+    <ion-spinner name="circles"></ion-spinner>
+    }
+</ion-chip>
+
+@defer (when openUserActions()) {
+<user-actions [isOpen]="openUserActions()"></user-actions>
+}

@@ -1,0 +1,104 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>
+      Unitary Prices for Categories - Zip Codes
+    </ion-title>
+    @if (processInProgress()) {
+    <ion-progress-bar type="indeterminate"></ion-progress-bar>
+    }
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <ion-grid>
+    <ion-row>
+      <ion-col size="12">
+        <p>
+          This is the list of unitary prices for categories and zip codes. Please, first select a category, then you can
+          search
+          for a specific price unitary by using the search bar.
+        </p>
+      </ion-col>
+      <ion-col size="12">
+        <ion-select label="Select a category" label-placement="floating" multiple="true" fill="outline"
+          [disabled]="processInProgress()" (ionChange)="categorySelected($any($event))">
+          <ion-select-option disabled>
+            Select a category
+          </ion-select-option>
+          @for (category of categories(); track category.id) {
+          <ion-select-option [value]="category.id">
+            {{category.name}}
+          </ion-select-option>
+          } @empty {
+          <ion-select-option>Please, wait a moment</ion-select-option>
+          }
+        </ion-select>
+
+      </ion-col>
+      <ion-col size="12">
+        <searchbar-table [disabled]="processInProgress()" [(searchText)]="searchText"
+          placeholder="Please enter a zip code, city or state"
+          (searchTextChange)="changeSearthTextToTable($event)"></searchbar-table>
+      </ion-col>
+      <ion-col size="12">
+
+        <div class="table-wrapper">
+
+          <table mat-table [dataSource]="dataSource" class="mat-elevation-z8">
+            <ng-container matColumnDef="code">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header disableClear>
+                Zip Code
+              </th>
+              <td mat-cell *matCellDef="let element">
+                {{element.ZipCode.code}}
+              </td>
+            </ng-container>
+            <ng-container matColumnDef="city">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header disableClear>
+                City
+              </th>
+              <td mat-cell *matCellDef="let element">
+                {{element.ZipCode.city}}
+              </td>
+            </ng-container>
+            <ng-container matColumnDef="state">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header disableClear>
+                State
+              </th>
+              <td mat-cell *matCellDef="let element">
+                {{element.ZipCode.state}}
+              </td>
+            </ng-container>
+            @for (column of categoriesSelected(); track column.id) {
+            <ng-container [matColumnDef]="'price_'+$any(column.id)">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header disableClear>
+                <p>
+                  {{column.name}}
+                </p>
+                <br>
+                <ion-button size="small" fill="outline" shape="round" (click)="setAllPrices(column)">
+                  Set all prices
+                </ion-button>
+              </th>
+              <td mat-cell *matCellDef="let element">
+                <ion-input [(ngModel)]="element['price_'+column.id]" ngDefaultControl fill="outline" type="number"
+                  min="0" max="1000" step="0.01" [disabled]="processInProgress()"
+                  (ngModelChange)="savePrice(element, column.id)" [clearInput]="false">
+                  <div class="dollar" slot="start">
+                    $
+                  </div>
+                </ion-input>
+              </td>
+            </ng-container>
+            }
+            <tr mat-header-row *matHeaderRowDef="columns"></tr>
+            <tr mat-row *matRowDef="let row; columns: columns;"></tr>
+          </table>
+          <mat-paginator #paginator pageSize="500" aria-label="Select page of prices"></mat-paginator>
+        </div>
+
+
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+</ion-content>

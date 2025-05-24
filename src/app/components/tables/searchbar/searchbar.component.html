@@ -1,0 +1,3 @@
+<ion-searchbar (ionInput)="searchTextChanged($event)" (ionClear)="searchText.set('')" [value]="searchText()"
+  [disabled]="disabled()" autocapitalize="words" autocorrect="on" [debounce]="700"
+  [placeholder]="placeholder()"></ion-searchbar>

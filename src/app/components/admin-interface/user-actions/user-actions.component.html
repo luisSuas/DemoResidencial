@@ -1,0 +1,11 @@
+<ion-popover trigger="open-popover-user-actions" [isOpen]="isOpen()" [dismissOnSelect]="true" (willDismiss)="isOpen.set(false)">
+    <ng-template>
+        <ion-content class="ion-padding">
+            <ion-list lines="none">
+                <ion-item (click)="logout()" [button]="true">
+                    Logout
+                </ion-item>
+            </ion-list>
+        </ion-content>
+    </ng-template>
+</ion-popover>

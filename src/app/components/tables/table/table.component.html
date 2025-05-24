@@ -1,0 +1,69 @@
+<div class="table-wrapper">
+
+  <table mat-table [dataSource]="dataSource" class="mat-elevation-z8" matSort [matSortActive]="sortColumn()"
+    [matSortDirection]="sortDirection()" matSortDisableClear [matSortStart]="sortDirection()"
+    (matSortChange)="sortChange($event)">
+    @for (column of columns(); track column.key) {
+    <ng-container [matColumnDef]="$any(column.key)">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header disableClear
+        [disabled]="columnNotInSortOptions($any(column.key))">
+        {{column.title}}
+      </th>
+      <td mat-cell *matCellDef="let element">
+        @switch (column.type) {
+        @case(ColumnType.Date){
+        {{element[column.key] | date:'dd/MM/yyyy HH:mm:ss'}}
+        }
+        @case(ColumnType.Boolean){
+        {{element[column.key] ? 'Yes' : 'No'}}
+        }
+        @case (ColumnType.Geolocation) {
+        <ion-button fill="clear" color="dark" (click)="showRoute(element[column.key])">
+          <ion-icon slot="icon-only" name="map"></ion-icon>
+        </ion-button>
+        }
+        @case(ColumnType.Action){
+        @if (actionOptions().length) {
+        <ion-button fill="clear" color="dark" (click)="showActions($event, element)">
+          <ion-icon slot="icon-only" name="ellipsis-vertical"></ion-icon>
+        </ion-button>
+        }
+        }
+        @case (ColumnType.Image) {
+        @if (element[column.key]) {
+        <ion-avatar (click)="openImage(element[column.key])">
+          <ion-img [src]="element[column.key]" alt=""></ion-img>
+        </ion-avatar>
+        }
+        }
+        @default{
+        {{element[column.key]}}
+        }
+        }
+      </td>
+    </ng-container>
+    }
+    <tr mat-header-row *matHeaderRowDef="displayedColumns()"></tr>
+    <tr mat-row *matRowDef="let row; columns: displayedColumns();"></tr>
+  </table>
+</div>
+@if(length()) {
+<div class="table-pagination-wrapper">
+  <div class="table-pagination">
+    Page {{page()}} of {{length()}}
+    <ion-button [disabled]="page() === 1" fill="clear" color="dark" (click)="changePage('prevPage')">
+      <ion-icon slot="icon-only" name="chevron-back"></ion-icon>
+    </ion-button>
+    <ion-button [disabled]="page() === length()" fill="clear" color="dark" (click)="changePage('nextPage')">
+      <ion-icon slot="icon-only" name="chevron-forward"></ion-icon>
+    </ion-button>
+  </div>
+</div>
+}
+@defer (when actionButtonPress()) {
+<ion-popover #dataActionPopover [dismissOnSelect]="true">
+  <ng-template>
+    <data-actions [options]="options()" (actionSelected)="actionSelected($event)"></data-actions>
+  </ng-template>
+</ion-popover>
+}

@@ -1,0 +1,84 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>{{nameElement}}</ion-title>
+  </ion-toolbar>
+  <ion-toolbar>
+    <ion-segment (ionChange)="segmentChanged($any($event))" value="Experience">
+      <ion-segment-button value="Experience">
+        <ion-label>
+          Experience
+        </ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="Reviews">
+        <ion-label>
+          Reviews
+        </ion-label>
+      </ion-segment-button>
+    </ion-segment>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <ion-header collapse="condense">
+    <ion-toolbar>
+      <ion-title size="large">
+        {{nameElement}}
+      </ion-title>
+    </ion-toolbar>
+  </ion-header>
+  <ion-grid>
+    <ion-row>
+      <ion-col size="12">
+        @if (canCreate) {
+        <ion-toolbar class="ion-no-border" color="transparent">
+          <ion-buttons slot="end">
+            <ion-button class="big" color="dark" fill="solid" shape="round" (click)="presentCreationModal()">
+              <ion-icon slot="start" name="add"></ion-icon>
+              Add
+            </ion-button>
+          </ion-buttons>
+        </ion-toolbar>
+        }
+        <p>
+          {{descriptionElement}}
+        </p>
+      </ion-col>
+      <ion-col size="12">
+        <searchbar-table [(searchText)]="searchText" placeholder="Search by code (reference name)"
+          (searchTextChange)="changeSearthTextToTable($event)"></searchbar-table>
+      </ion-col>
+      <ion-col size="12">
+        <data-table #dataTable modelPath="factor" [sortColumn]="sortColumn()" sortColumn="code"
+          [extraQueries]="extraQueries()" (nextId)="nextId.set($event)" [sortDirection]="sortDirection()"
+          [columns]="columns" [(searchText)]="searchText" [orderOptions]="orderOptions" [pageSize]="pageSize"
+          [actionOptions]="actionOptions" (actionPerformPressed)="performAction($event.action, $event.element)">
+        </data-table>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+</ion-content>
+
+
+<ion-modal #modalCreateEdit (didDismiss)="factorInUpdate.set(null)">
+  <ng-template>
+    <ion-header>
+      <ion-toolbar>
+        <ion-buttons slot="start">
+          <ion-button (click)="modalCreateEdit.dismiss()">Cancel</ion-button>
+        </ion-buttons>
+        <ion-title>
+          {{actionName()}}
+        </ion-title>
+
+      </ion-toolbar>
+    </ion-header>
+
+    <ion-content #triggerForm class="ion-padding">
+      @defer (on viewport(triggerForm)) {
+      <custom-form [processInProgress]="processInProgress()" [fields]="fields" [data]="factorInUpdate()" path="category"
+        [nextId]="nextId()" [isUpdating]="isUpdating()" (dataChange)="save($any($event))">
+      </custom-form>
+      }
+    </ion-content>
+  </ng-template>
+</ion-modal>

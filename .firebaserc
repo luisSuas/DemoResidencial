@@ -1,0 +1,16 @@
+{
+  "projects": {
+    "default": "xjobs-app"
+  },
+  "targets": {
+    "xjobs-app": {
+      "hosting": {
+        "admin-xjobs": [
+          "admin-xjobs"
+        ]
+      }
+    }
+  },
+  "etags": {},
+  "dataconnectEmulatorConfig": {}
+}

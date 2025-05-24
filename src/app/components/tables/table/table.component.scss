@@ -1,0 +1,37 @@
+.table-wrapper {
+    overflow-x: auto;
+    border-radius: 20px;
+    table {
+        width: max-content;
+        overflow-x: auto;
+    }
+}
+.mat-mdc-table {
+    background-color: var(--ion-card-background);
+    color: var(--ion-text-color);
+    max-width: 40vw;
+}
+
+
+.table-pagination-wrapper {
+    width: 100%;
+    display: flex;
+    align-items: flex-end;
+    justify-content: end;
+    .table-pagination {
+        border-radius: 20px;
+        margin-top: 20px;
+        width: fit-content;
+        background: var(--ion-card-background);
+        padding-left: 30px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        padding: 10px;
+        padding-left: 30px;
+        font-size: 0.8rem;
+        overflow: hidden;
+        position: relative;
+    }
+}

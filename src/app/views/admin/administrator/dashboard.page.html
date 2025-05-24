@@ -1,0 +1,202 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-title class="ion-text-center">{{ name }}</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <ion-grid>
+
+    <!-- MAIN METRICS -->
+    <ion-row>
+      <ion-col size="12" size-md="6" size-lg="4">
+        <ion-card color="light">
+          <ion-card-content class="dashboard-card-content ion-text-center">
+            <ion-icon class="dashboard-icon home-workers" [icon]="'home-outline'" size="large"></ion-icon>
+            <h2>Home Workers</h2>
+            <p>{{ homeWorkersCount }} home workers</p>
+          </ion-card-content>
+        </ion-card>
+      </ion-col>
+
+      <ion-col size="12" size-md="6" size-lg="4">
+        <ion-card color="light">
+          <ion-card-content class="dashboard-card-content ion-text-center">
+            <ion-icon class="dashboard-icon workers" [icon]="'people-outline'" size="large"></ion-icon>
+            <h2>Workers</h2>
+            <p>{{ workersCount }} workers</p>
+          </ion-card-content>
+        </ion-card>
+      </ion-col>
+
+      <ion-col size="12" size-md="6" size-lg="4">
+        <ion-card color="light">
+          <ion-card-content class="dashboard-card-content ion-text-center">
+            <ion-icon class="dashboard-icon orders" [icon]="'document-text-outline'" size="large"></ion-icon>
+            <h2>Orders</h2>
+            <p>{{ ordersCount }} orders</p>
+          </ion-card-content>
+        </ion-card>
+      </ion-col>
+    </ion-row>
+
+    <!-- TRACKING PANEL -->
+    <ion-row>
+      <ion-col size="12">
+        <ion-card color="light" id="tracking-panel">
+          <ion-card-header>
+            <ion-card-title>Tracking Panel</ion-card-title>
+          </ion-card-header>
+          <ion-card-content>
+
+            <!-- Area Filter -->
+            <ion-segment [(ngModel)]="selectedArea" (ionChange)="onAreaChanged($event)">
+              <ion-segment-button value="all">All</ion-segment-button>
+              <ion-segment-button value="hotel">Hotel</ion-segment-button>
+              <ion-segment-button value="casino">Casino</ion-segment-button>
+            </ion-segment>
+
+            <!-- Time Filter -->
+            <ion-segment [(ngModel)]="selectedSegment" (ionChange)="onSegmentChanged($event)" style="margin-top: 8px;">
+              <ion-segment-button value="daily">Daily</ion-segment-button>
+              <ion-segment-button value="weekly">Weekly</ion-segment-button>
+              <ion-segment-button value="monthly">Monthly</ion-segment-button>
+            </ion-segment>
+
+            <!-- Most Requested Jobs List -->
+            <ion-list style="margin-top: 16px;">
+              <ion-list-header>
+                <ion-label>Most Requested Jobs ({{ selectedSegment | titlecase }})</ion-label>
+              </ion-list-header>
+              <ion-item *ngFor="let job of currentPopularJobs">
+                <ion-label>{{ job.job }}</ion-label>
+                <ion-progress-bar
+                  [color]="getJobHexColor(job.category)"
+                  [value]="job.count / maxJobCount"
+                  style="height: 20px; border-radius: 10px; margin: 0 10px;">
+                </ion-progress-bar>
+                <ion-badge slot="end" color="primary">{{ job.count }}</ion-badge>
+              </ion-item>
+            </ion-list>
+
+            <!-- Popular Jobs Chart -->
+            <div class="popular-jobs-chart-container" style="max-width: 100%; margin-top: 12px;">
+              <canvas id="popularJobsChart" #popularJobsChart style="width: 100%; height: 300px;"></canvas>
+            </div>
+
+          </ion-card-content>
+        </ion-card>
+      </ion-col>
+    </ion-row>
+
+    <!-- RANKING AND GRAPHS -->
+    <ion-row>
+      <ion-col size="12" size-md="4">
+        <ion-card color="light">
+          <ion-card-header>
+            <ion-card-title>Top 5 Workers</ion-card-title>
+          </ion-card-header>
+          <ion-card-content>
+            <ion-list>
+              <ion-item *ngFor="let worker of topWorkers; let i = index">
+                <ion-icon [icon]="'trophy-outline'" slot="start" color="warning"></ion-icon>
+                <ion-label>
+                  <h2>{{ i + 1 }}. {{ worker.name }}</h2>
+                  <p>Orders: {{ worker.points }}</p>
+                </ion-label>
+                <ion-badge color="primary">{{ i + 1 }}</ion-badge>
+              </ion-item>
+            </ion-list>
+          </ion-card-content>
+        </ion-card>
+      </ion-col>
+
+    <ion-col size="12" size-md="4">
+  <ion-card color="light">
+    <ion-card-header>
+      <ion-card-title>Chart - Last 7 Days</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <div class="orders-chart-container">
+        <canvas id="ordersChart" #ordersChart></canvas>
+      </div>
+    </ion-card-content>
+  </ion-card>
+</ion-col>
+
+      <ion-col size="12" size-md="4">
+        <ion-card color="light">
+          <ion-card-header>
+            <ion-card-title>Most Requested Jobs</ion-card-title>
+          </ion-card-header>
+          <ion-card-content>
+            <div style="max-width: 350px; margin: 0 auto;">
+              <canvas
+                id="mostRequestedChart"
+                #mostRequestedChart
+                style="width: 100%; aspect-ratio: 1 / 1; max-height: 300px;">
+              </canvas>
+            </div>
+          </ion-card-content>
+        </ion-card>
+      </ion-col>
+    </ion-row>
+
+    <!-- WORKER STATUS PANEL + HISTORY -->
+    <ion-row>
+      <ion-col size="12">
+        <ion-card color="light">
+          <ion-card-header>
+            <ion-card-title>Worker Task Status & History</ion-card-title>
+          </ion-card-header>
+          <ion-card-content>
+
+            <ion-segment [(ngModel)]="selectedWorkerSegment" (ionChange)="onSegmentChanged($event)">
+              <ion-segment-button value="daily">Daily</ion-segment-button>
+              <ion-segment-button value="weekly">Weekly</ion-segment-button>
+              <ion-segment-button value="monthly">Monthly</ion-segment-button>
+            </ion-segment>
+
+            <ion-accordion-group>
+              <ion-accordion *ngFor="let worker of workersActivity">
+                <ion-item slot="header" color="light">
+                  <ion-label>
+                    <strong>{{ worker.name }}</strong> — {{ worker.task }}
+                  </ion-label>
+                  <ion-badge [color]="getStatusColor(worker.status)" slot="end">{{ getStatusText(worker.status) }}</ion-badge>
+                </ion-item>
+
+                <div class="ion-padding" slot="content">
+                  <p><strong>Estado actual:</strong> {{ getStatusText(worker.status) }}</p>
+
+                  <p *ngIf="worker.status === 'in-progress'">
+                    <ion-progress-bar type="determinate" [value]="getCurrentProgress(worker)"></ion-progress-bar>
+                    <small>Progreso: {{ getCurrentProgress(worker) * 100 | number:'1.0-0' }}%</small>
+                  </p>
+
+                  <ion-list>
+                    <ion-list-header>
+                      <ion-label><strong>Historial de Actividades</strong></ion-label>
+                    </ion-list-header>
+                    <ion-item *ngFor="let task of worker.history">
+                      <ion-label>
+                        <h3>{{ task.task }}</h3>
+                        <p>
+                          Tiempo: {{ task.duration }} horas <br>
+                          Pago: {{ task.payment }}
+                        </p>
+                      </ion-label>
+                      <ion-note slot="end">{{ task.date }}</ion-note>
+                    </ion-item>
+                  </ion-list>
+                </div>
+              </ion-accordion>
+            </ion-accordion-group>
+
+          </ion-card-content>
+        </ion-card>
+      </ion-col>
+    </ion-row>
+
+  </ion-grid>
+</ion-content>

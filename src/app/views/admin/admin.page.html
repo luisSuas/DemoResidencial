@@ -1,0 +1,27 @@
+<ion-split-pane when="md" contentId="admin-user-router">
+  <ion-menu menuId="admin-menu" contentId="admin-user-router">
+    <ion-header class="ion-no-border">
+      <ion-toolbar class="ion-no-border">
+        <div class="custom-title">
+          <img src="./../../../assets/img/logo-black.svg" alt="Logo XJobs" width="250">
+        </div>
+      </ion-toolbar>
+    </ion-header>
+    <ion-content class="ion-padding">
+      <ion-list class="menu" lines="none">
+        @for (route of routes; track $index) {
+        <ion-menu-toggle [autoHide]="false">
+          <ion-item [routerLink]="[route.route]" routerLinkActive="active" [routerLinkActiveOptions]="{exact:false}">
+            <ion-icon slot="start" [name]="route.icon"></ion-icon>
+            <ion-label>
+              {{route.title}}
+            </ion-label>
+          </ion-item>
+        </ion-menu-toggle>
+        }
+      </ion-list>
+    </ion-content>
+  </ion-menu>
+  <ion-router-outlet id="admin-user-router"></ion-router-outlet>
+  <admin-toolbar></admin-toolbar>
+</ion-split-pane>

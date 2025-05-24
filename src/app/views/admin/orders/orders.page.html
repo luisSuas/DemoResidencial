@@ -1,0 +1,95 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>{{nameElement}}</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <ion-header collapse="condense">
+    <ion-toolbar>
+      <ion-title size="large">
+        {{nameElement}}
+      </ion-title>
+    </ion-toolbar>
+  </ion-header>
+  <ion-grid>
+    <ion-row>
+      <ion-col size="12">
+        <div class="order-chips">
+          <!-- 
+        I have this states for order: 'DRAFT','CREATED','ACCEPTED','REJECTED','ON THE WAY','IN_PROGRESS','FINISHED','REVIEWED','RESCHDULED_BY_WORKER','RESCHDULED_BY_HOME_OWNER','CANCELED_BEFORE_ACCEPTED','CANCELED_NOT_REFUNDED','CANCELED_REFUNDED','PUBLIC',
+          I need to create a ion-chip for each with a human label, example: for DRAFT => <ion-chip>On Draft</ion-chip>; for CANCELED_BEFORE_ACCEPTED => <ion-chip>Canceled before accepted</ion-chip> 
+        -->
+          @for (statusLabelSelected of statusValueLabel(); track statusLabelSelected.key) {
+          <ion-chip color="dark" [outline]="!statusLabelSelected.selected"
+            (click)="statusChanged(statusLabelSelected.key)">
+            <ion-label>
+              {{statusLabelSelected.label}}
+            </ion-label>
+          </ion-chip>
+          }
+        </div>
+      </ion-col>
+      <ion-col size="12">
+        @if (canCreate) {
+        <ion-toolbar class="ion-no-border" color="transparent">
+          <ion-button class="big" color="dark" fill="solid" shape="round" (click)="export()">
+            Export
+          </ion-button>
+        </ion-toolbar>
+        }
+        <p>
+          {{descriptionElement}}
+        </p>
+      </ion-col>
+      <ion-col size="12">
+        <h5>
+          Filter by month, take in mind, the filter is default on the current year, not month!
+        </h5>
+        <ion-datetime-button datetime="datetime"></ion-datetime-button>
+      </ion-col>
+      <ion-col size="12">
+        <searchbar-table [(searchText)]="searchText" placeholder="Search by Zip Code or Category name"
+          (searchTextChange)="changeSearthTextToTable($event)"></searchbar-table>
+      </ion-col>
+      <ion-col size="12">
+        <data-table #dataTable modelPath="order" [sortColumn]="sortColumn()" (nextId)="nextId.set($event)"
+          [sortDirection]="sortDirection()" [columns]="columns" [(searchText)]="searchText"
+          [extraQueries]="{status: statusSelected(), filterDate: filterDate() }" [orderOptions]="orderOptions" [pageSize]="pageSize"
+          [actionOptions]="actionOptions" (actionPerformPressed)="performAction($event.action, $event.element)">
+        </data-table>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+</ion-content>
+
+<ion-modal [keepContentsMounted]="true">
+  <ng-template>
+    <ion-datetime presentation="month-year" (ionChange)="filterByDateChanged($event)" id="datetime"></ion-datetime>
+  </ng-template>
+</ion-modal>
+
+<!-- 
+<ion-modal #modalCreateEdit (didDismiss)="categoryInUpdate.set(null)">
+  <ng-template>
+    <ion-header>
+      <ion-toolbar>
+        <ion-buttons slot="start">
+          <ion-button (click)="modalCreateEdit.dismiss()">Cancel</ion-button>
+        </ion-buttons>
+        <ion-title>
+          {{actionName()}}
+        </ion-title>
+
+      </ion-toolbar>
+    </ion-header>
+
+    <ion-content #triggerForm class="ion-padding">
+      @defer (on viewport(triggerForm)) {
+      <custom-form [processInProgress]="processInProgress()" [fields]="fields" [data]="categoryInUpdate()"
+        path="category" [nextId]="nextId()" [isUpdating]="isUpdating()" (dataChange)="save($any($event))">
+      </custom-form>
+      }
+    </ion-content>
+  </ng-template>
+</ion-modal> -->

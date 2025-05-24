@@ -1,0 +1,7 @@
+{
+  "name": "XJobs - Admin",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "angular-standalone"
+}

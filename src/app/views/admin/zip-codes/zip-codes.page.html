@@ -1,0 +1,74 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>{{nameElement}}</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <ion-header collapse="condense">
+    <ion-toolbar>
+      <ion-title size="large">
+        {{nameElement}}
+      </ion-title>
+    </ion-toolbar>
+  </ion-header>
+  <ion-grid>
+    <ion-row>
+      <ion-col size="12">
+        @if (canCreate) {
+        <ion-toolbar class="ion-no-border" color="transparent">
+
+          <ion-buttons slot="end">
+            <ion-button class="big" color="dark" fill="solid" shape="round" (click)="presentCreationModal()">
+              <ion-icon slot="start" name="add"></ion-icon>
+              Add
+            </ion-button>
+          </ion-buttons>
+        </ion-toolbar>
+        }
+        <p>
+          {{descriptionElement}}
+        </p>
+      </ion-col>
+      <ion-col size="12">
+        <searchbar-table [(searchText)]="searchText" placeholder="Search by code, city or state"
+          (searchTextChange)="changeSearthTextToTable($event)"></searchbar-table>
+      </ion-col>
+      <ion-col size="12">
+        <data-table #dataTable modelPath="zipcode" [sortColumn]="sortColumn()" sortColumn="code"
+          [modelFormatter]="modelFormatter" [sortDirection]="sortDirection()" [columns]="columns"
+          [(searchText)]="searchText" [orderOptions]="orderOptions" [pageSize]="pageSize"
+          [actionOptions]="actionOptions" (actionPerformPressed)="performAction($event.action, $event.element)">
+        </data-table>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+</ion-content>
+
+
+<ion-modal #modalCreateEdit (didDismiss)="zipInUpdate.set(null)">
+  <ng-template>
+    <ion-header>
+      <ion-toolbar>
+        <ion-buttons slot="start">
+          <ion-button (click)="modalCreateEdit.dismiss()">Cancel</ion-button>
+        </ion-buttons>
+        <ion-title>
+          {{actionName()}}
+        </ion-title>
+
+      </ion-toolbar>
+    </ion-header>
+
+    <ion-content #triggerForm class="ion-padding">
+
+
+
+      @defer (on viewport(triggerForm)) {
+      <custom-form [processInProgress]="processInProgress()" [fields]="fields" [data]="zipInUpdate()"
+        [isUpdating]="isUpdating()" (dataChange)="save($any($event))">
+      </custom-form>
+      }
+    </ion-content>
+  </ng-template>
+</ion-modal>

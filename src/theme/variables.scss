@@ -1,0 +1,62 @@
+// For information on how to create your own theme, please see:
+// http://ionicframework.com/docs/theming/
+
+// @import url("https://fonts.googleapis.com/css2?family=Geologica:wght@100;300;400;500;700&display=swap");
+
+// :root {
+//     font-family: "Geologica", sans-serif;
+//     font-family: "Inter", sans-serif;
+//     --ion-font-family: "Geologica", sans-serif !important;
+
+// --ion-color-primary: #181828;
+// --ion-color-primary-rgb: 237, 209, 33;
+// --ion-color-primary-contrast: #ffffff;
+// --ion-color-primary-contrast-rgb: 0, 0, 0;
+// --ion-color-primary-shade: #d1b81d;
+// --ion-color-primary-tint: #efd637;
+// }
+
+// .ion-color-primary {
+//     --ion-color-primary: var(--ion-color-primary);
+//     --ion-color-base-rgb: var(--ion-color-primary-rgb);
+//     --ion-color-contrast: var(--ion-color-primary-contrast);
+//     --ion-color-contrast-rgb: var(--ion-color-primary-contrast-rgb);
+//     --ion-color-shade: var(--ion-color-primary-shade);
+//     --ion-color-tint: var(--ion-color-primary-tint);
+// }
+
+:root {
+    --ion-color-primary: #160041;
+    --ion-color-primary-rgb: 237, 209, 33;
+    --ion-color-primary-contrast: #ffffff;
+    --ion-color-primary-contrast-rgb: 0, 0, 0;
+    --ion-color-primary-shade: #d1b81d;
+    --ion-color-primary-tint: #efd637;
+
+    --ion-color-tertiary: #dcf0da;
+    --ion-color-tertiary-rgb: 220, 240, 218;
+    --ion-color-tertiary-contrast: #000000;
+    --ion-color-tertiary-contrast-rgb: 0, 0, 0;
+    --ion-color-tertiary-shade: #c2d3c0;
+    --ion-color-tertiary-tint: #e0f2de;
+
+    --ion-text-color: #212024;
+
+    --mdc-icon-button-disabled-icon-color: var(--ion-color-light);
+    --mat-table-header-headline-color: var(--ion-text-color);
+    --mat-table-row-item-outline-color: var(--ion-background-color);
+    --mat-table-row-item-label-text-color: var(--ion-text-color);
+    &.ios {
+        --ion-background-color: #ffffff;
+        --ion-card-background: #f7f7f7;
+    }
+}
+
+.ion-color-tertiary {
+    --ion-color-base: var(--ion-color-tertiary);
+    --ion-color-base-rgb: var(--ion-color-tertiary-rgb);
+    --ion-color-contrast: var(--ion-color-tertiary-contrast);
+    --ion-color-contrast-rgb: var(--ion-color-tertiary-contrast-rgb);
+    --ion-color-shade: var(--ion-color-tertiary-shade);
+    --ion-color-tint: var(--ion-color-tertiary-tint);
+}

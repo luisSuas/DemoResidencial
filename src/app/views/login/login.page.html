@@ -1,0 +1,50 @@
+<ion-content [fullscreen]="true">
+
+  <ion-grid class="ion-no-padding h-100 w-100">
+    <ion-row class="ion-no-padding h-100 w-100">
+      <ion-col class="ion-hide-md-down h-100" size-md="6" size-lg="8">
+        <div class="blue-card h-100 w-100">
+          @if (viewDidEnter()) {
+          <img loading="lazy" class="principal" src="./../../../assets/logo/logo.svg" alt="">
+          }
+        </div>
+      </ion-col>
+      <ion-col class="h-100" size="12" size-md="6" size-lg="4">
+        <div class="login-card h-100 w-100">
+          <form (ngSubmit)="login()" f="ngForm" [formGroup]="form">
+            <ion-list class="form">
+              <h1>
+                Welcome
+              </h1>
+              <p>
+                Please, fill the form to login
+              </p>
+              <ion-input formControlName="email" placeholder="Email" mode="md" fill="outline" type="email"
+                [errorText]="textError('email')" required></ion-input>
+              <ion-input [minlength]="6" [errorText]="textError('password')" formControlName="password"
+                placeholder="Password" mode="md" fill="outline" type="password">
+                <ion-input-password-toggle slot="end"></ion-input-password-toggle>
+              </ion-input>
+
+
+              <ion-button [disabled]="form.invalid || processInProgress()" expand="block" fill="solid" shape="round"
+                type="submit">
+                @if(!processInProgress()){
+                Login
+                } @else{
+                @defer (on idle) {
+                <ion-spinner slot="start"></ion-spinner>
+                }
+                }
+              </ion-button>
+              <ion-button expand="block" fill="clear" shape="round" type="button" size="small" color="dark"
+                (click)="forgot()">
+                Forgot password?
+              </ion-button>
+            </ion-list>
+          </form>
+        </div>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+</ion-content>
