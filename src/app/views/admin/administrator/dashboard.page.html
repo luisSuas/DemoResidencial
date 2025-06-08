@@ -111,18 +111,18 @@
         </ion-card>
       </ion-col>
 
-    <ion-col size="12" size-md="4">
-  <ion-card color="light">
-    <ion-card-header>
-      <ion-card-title>Chart - Last 7 Days</ion-card-title>
-    </ion-card-header>
-    <ion-card-content>
-      <div class="orders-chart-container">
-        <canvas id="ordersChart" #ordersChart></canvas>
-      </div>
-    </ion-card-content>
-  </ion-card>
-</ion-col>
+      <ion-col size="12" size-md="4">
+        <ion-card color="light">
+          <ion-card-header>
+            <ion-card-title>Chart - Last 7 Days</ion-card-title>
+          </ion-card-header>
+          <ion-card-content>
+            <div class="orders-chart-container">
+              <canvas id="ordersChart" #ordersChart></canvas>
+            </div>
+          </ion-card-content>
+        </ion-card>
+      </ion-col>
 
       <ion-col size="12" size-md="4">
         <ion-card color="light">
@@ -142,53 +142,89 @@
       </ion-col>
     </ion-row>
 
-    <!-- WORKER STATUS PANEL + HISTORY -->
+    <!-- WORKER STATUS PANEL + HISTORY AS CARDS -->
     <ion-row>
       <ion-col size="12">
-        <ion-card color="light">
+        <ion-segment [(ngModel)]="selectedWorkerSegment" (ionChange)="onWorkerSegmentChanged($event)">
+          <ion-segment-button value="daily">Daily</ion-segment-button>
+          <ion-segment-button value="weekly">Weekly</ion-segment-button>
+          <ion-segment-button value="monthly">Monthly</ion-segment-button>
+        </ion-segment>
+      </ion-col>
+    </ion-row>
+
+    <ion-row>
+      <ion-col size="12" size-md="4" *ngFor="let worker of workersActivity">
+        <ion-card class="worker-card" color="light" [ngStyle]="{ 'box-shadow': getCardShadow(worker) }">
           <ion-card-header>
-            <ion-card-title>Worker Task Status & History</ion-card-title>
+            <ion-card-title class="ion-text-center">{{ worker.name }}</ion-card-title>
+            <ion-badge [color]="getStatusColor(worker.status)" class="worker-status-badge">
+              {{ getStatusText(worker.status) }}
+            </ion-badge>
           </ion-card-header>
+
           <ion-card-content>
+            <!-- Barra de progreso personalizada -->
+            <div class="progress-container">
+              <div
+                class="progress-bar"
+                [ngStyle]="{
+                  width: getProgressBarWidth(worker),
+                  'background-color': getProgressBarColor(worker),
+                  border: getProgressBarBorder(worker)
+                }"
+              ></div>
+            </div>
+            <small>Progress: {{ getProgressBarWidth(worker) }}</small>
 
-            <ion-segment [(ngModel)]="selectedWorkerSegment" (ionChange)="onSegmentChanged($event)">
-              <ion-segment-button value="daily">Daily</ion-segment-button>
-              <ion-segment-button value="weekly">Weekly</ion-segment-button>
-              <ion-segment-button value="monthly">Monthly</ion-segment-button>
-            </ion-segment>
+            <!-- Mostrar actividad actual -->
+            <p><strong>Current Task:</strong> {{ worker.task }}</p>
 
+            <p><strong>Total Hours:</strong> {{ getTotalHours(worker) }} hours</p>
+            <p><strong>Total Paid:</strong> {{ getTotalPayment(worker) }}</p>
+
+            <!-- Activity History -->
+            <ion-list>
+              <ion-list-header>
+                <ion-label><strong>Activity History</strong></ion-label>
+              </ion-list-header>
+              <ion-item *ngFor="let task of worker.history">
+                <ion-label>
+                  <h3>{{ task.task }}</h3>
+                  <p>Time: {{ task.duration }}h | Pay: {{ task.payment }}</p>
+                </ion-label>
+                <ion-note slot="end">{{ task.date }}</ion-note>
+              </ion-item>
+            </ion-list>
+
+            <!-- NUEVO: Status Log -->
             <ion-accordion-group>
-              <ion-accordion *ngFor="let worker of workersActivity">
-                <ion-item slot="header" color="light">
-                  <ion-label>
-                    <strong>{{ worker.name }}</strong> — {{ worker.task }}
-                  </ion-label>
-                  <ion-badge [color]="getStatusColor(worker.status)" slot="end">{{ getStatusText(worker.status) }}</ion-badge>
+              <ion-accordion>
+                <ion-item slot="header">
+                  <ion-icon name="calendar-outline" slot="start"></ion-icon>
+                  <ion-label>Status Log</ion-label>
                 </ion-item>
-
-                <div class="ion-padding" slot="content">
-                  <p><strong>Estado actual:</strong> {{ getStatusText(worker.status) }}</p>
-
-                  <p *ngIf="worker.status === 'in-progress'">
-                    <ion-progress-bar type="determinate" [value]="getCurrentProgress(worker)"></ion-progress-bar>
-                    <small>Progreso: {{ getCurrentProgress(worker) * 100 | number:'1.0-0' }}%</small>
-                  </p>
-
-                  <ion-list>
-                    <ion-list-header>
-                      <ion-label><strong>Historial de Actividades</strong></ion-label>
-                    </ion-list-header>
-                    <ion-item *ngFor="let task of worker.history">
+                <div slot="content" class="ion-padding">
+                  <ion-list *ngIf="worker.statusLog?.length">
+                    <ion-item *ngFor="let log of worker.statusLog">
                       <ion-label>
-                        <h3>{{ task.task }}</h3>
-                        <p>
-                          Tiempo: {{ task.duration }} horas <br>
-                          Pago: {{ task.payment }}
-                        </p>
+                        <h3>{{ log.state }}</h3>
+                        <p *ngIf="log.date"><ion-icon name="time-outline"></ion-icon> {{ log.date }}</p>
+                        <p *ngIf="log.payment"><ion-icon name="cash-outline"></ion-icon> {{ log.payment }}</p>
+                        <div *ngIf="log.images?.length" class="status-images">
+                          <ion-img *ngFor="let img of log.images" [src]="img" class="thumb"></ion-img>
+                        </div>
+                        <div *ngIf="log.rating">
+                          <ion-icon 
+                            *ngFor="let _ of getStarsArray(log.rating)" 
+                            name="star" 
+                            class="star">
+                          </ion-icon>
+                        </div>
                       </ion-label>
-                      <ion-note slot="end">{{ task.date }}</ion-note>
                     </ion-item>
                   </ion-list>
+                  <p *ngIf="!worker.statusLog?.length">No status steps recorded.</p>
                 </div>
               </ion-accordion>
             </ion-accordion-group>
