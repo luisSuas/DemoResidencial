@@ -1,5 +1,5 @@
-<ion-split-pane when="md" contentId="admin-user-router">
-  <ion-menu menuId="admin-menu" contentId="admin-user-router">
+<ion-split-pane when="md" contentId="main-content">
+  <ion-menu menuId="admin-menu" contentId="main-content">
     <ion-header class="ion-no-border">
       <ion-toolbar class="ion-no-border">
         <div class="custom-title">
@@ -9,19 +9,57 @@
     </ion-header>
     <ion-content class="ion-padding">
       <ion-list class="menu" lines="none">
-        @for (route of routes; track $index) {
-        <ion-menu-toggle [autoHide]="false">
-          <ion-item [routerLink]="[route.route]" routerLinkActive="active" [routerLinkActiveOptions]="{exact:false}">
+        <ng-container *ngFor="let route of routes">
+
+          <!-- Dashboard -->
+          <ion-item
+            *ngIf="route.children"
+            button
+            (click)="toggleDashboard()"
+            [routerLink]="[route.route]"
+            routerLinkActive="active"
+            [routerLinkActiveOptions]="{ exact: true }">
             <ion-icon slot="start" [name]="route.icon"></ion-icon>
-            <ion-label>
-              {{route.title}}
-            </ion-label>
+            <ion-label>{{ route.title }}</ion-label>
+            <ion-icon
+              slot="end"
+              [name]="showDashboardSub ? 'chevron-up' : 'chevron-down'">
+            </ion-icon>
           </ion-item>
-        </ion-menu-toggle>
-        }
+
+          <!-- Sub‐items -->
+          <ng-container *ngIf="route.children && showDashboardSub">
+            <ion-menu-toggle *ngFor="let child of route.children" [autoHide]="false">
+              <ion-item
+                button
+                [routerLink]="[child.route]"
+                routerLinkActive="active"
+                [routerLinkActiveOptions]="{ exact: false }"
+                style="--padding-start:32px">
+                <ion-icon slot="start" [name]="child.icon"></ion-icon>
+                <ion-label>{{ child.title }}</ion-label>
+              </ion-item>
+            </ion-menu-toggle>
+          </ng-container>
+
+          <!-- Otras rutas -->
+          <ion-menu-toggle *ngIf="!route.children" [autoHide]="false">
+            <ion-item
+              button
+              [routerLink]="[route.route]"
+              routerLinkActive="active"
+              [routerLinkActiveOptions]="{ exact: false }">
+              <ion-icon slot="start" [name]="route.icon"></ion-icon>
+              <ion-label>{{ route.title }}</ion-label>
+            </ion-item>
+          </ion-menu-toggle>
+
+        </ng-container>
       </ion-list>
     </ion-content>
   </ion-menu>
-  <ion-router-outlet id="admin-user-router"></ion-router-outlet>
+
+  <!-- Aquí se monta tu contenido hija (Dashboard, Modelado3D, etc.) -->
+  <ion-router-outlet id="main-content"></ion-router-outlet>
   <admin-toolbar></admin-toolbar>
 </ion-split-pane>

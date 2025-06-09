@@ -4,8 +4,17 @@ export const AdminRoutesList: UserRoute[] = [
      {
         icon: 'grid',
         title: 'Dashboard',
-        route: 'dashboard'
+        route: 'dashboard',
+        
+        children: [
+      {
+        icon: 'cube',
+        title: '3D Modeling',
+        route: '3d-modeling'
+      }
+    ]
     },
+    
     {
         icon: 'key',
         title: 'Administrators',

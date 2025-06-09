@@ -60,6 +60,12 @@ export const ADMIN_ROUTES: Route[] = [
                 loadComponent: () => import('./variables/variables.page').then(m => m.VariablesPage)
             },
             {
+      
+                path: '3d-modeling',
+                title: "3D Modeling",
+                loadComponent: () => import('./administrator/modelado3d/modelado3d.page').then(m => m.Modelado3dPage)
+            },
+            {
                 path: '',
                 redirectTo: '/admin/administrators',
                 pathMatch: 'full'
