@@ -1,5 +1,6 @@
-import { Component, AfterViewInit, OnInit, OnDestroy, ViewChild, ElementRef } from '@angular/core';
-import { IonicModule } from '@ionic/angular';
+import { Component, AfterViewInit, OnInit, OnDestroy, ViewChild, ElementRef, ChangeDetectorRef } from '@angular/core';
+import { IonicModule} from '@ionic/angular';
+import { SegmentChangeEventDetail } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { addIcons } from 'ionicons';
@@ -63,8 +64,31 @@ interface PopularJob {
 })
 export class DashboardPage implements AfterViewInit, OnInit, OnDestroy {
   name = 'Dashboard';
-  
+    currentSection: 'tenant'|'worker'|'orders' = 'tenant';
+    selectedSegment: 'daily' | 'weekly' | 'monthly' = 'daily';
+  selectedWorkerSegment: 'daily' | 'weekly' | 'monthly' = 'daily';
   days: Day[] = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+
+ // ─── TENANT KPIs ───
+  completionRate = 0.85;                  // 85% tasks completed
+  avgResponseTime = 28;                   // avg response in minutes
+  upcomingTasks = ['Fix AC', 'Inspect Room', 'Clean Lobby'];
+
+  // ─── WORKER KPIs ───
+  @ViewChild('statusPie', { static: false }) statusPieRef!: ElementRef<HTMLCanvasElement>;
+  statusPie?: Chart;
+
+  // ─── ORDERS KPIs ───
+  @ViewChild('trendLine', { static: false }) trendLineRef!: ElementRef<HTMLCanvasElement>;
+  trendChart?: Chart;
+  cancelRate = 0.04;                      // 4% cancellations
+  ordersFinished: Record<'daily' | 'weekly' | 'monthly', number> = {
+    daily: 1500,
+    weekly: 8000,
+    monthly: 30000
+  };
+  goal = 2000;
+  goalProgress = this.ordersFinished[this.selectedSegment] / this.goal;
 
   homeWorkersCount = 10;
   workersCount = 120;
@@ -88,9 +112,9 @@ export class DashboardPage implements AfterViewInit, OnInit, OnDestroy {
   Sun: { accepted: 80, inProgress: 70, notAccepted: 30 }
 };
 
-  selectedSegment: 'daily' | 'weekly' | 'monthly' = 'daily';
-  selectedWorkerSegment: 'daily' | 'weekly' | 'monthly' = 'daily';
-  selectedArea: 'all' | 'hotel' | 'casino' = 'all';
+  
+ 
+ 
 
   popularJobs: Record<'daily' | 'weekly' | 'monthly', PopularJob[]> = {
     daily: [
@@ -180,7 +204,8 @@ export class DashboardPage implements AfterViewInit, OnInit, OnDestroy {
         ],
          statusLog: [
           {state:'Posted offer', date:'2025-06-01'},
-          {state:'Offer accepted by the worker', date:'2025-06-02'}
+          {state:'Offer accepted by the worker', date:'2025-06-02'},
+           { state: 'Star rating', date: '2025-06-17', rating: 3 }
         ]
       },
       {
@@ -212,7 +237,8 @@ export class DashboardPage implements AfterViewInit, OnInit, OnDestroy {
           {state:'Offer posted',date:'2025-05-28'},
           {state:'Offer accepted by the worker',date:'2025-05-29'},
           {state:'Date planned',date:'2025-05-30'},
-          {state:'Site completion',date:'2025-06-01',payment:'$75'}
+          {state:'Site completion',date:'2025-06-01',payment:'$75'},
+           { state: 'Star rating', date: '2025-06-09', rating: 5 }
         ]
     },
     {
@@ -240,7 +266,8 @@ export class DashboardPage implements AfterViewInit, OnInit, OnDestroy {
       ],
       statusLog:[
           {state:'Offer posted',date:'2025-05-28'},
-          {state:'Offer accepted by the worker',date:'2025-05-29'}
+          {state:'Offer accepted by the worker',date:'2025-05-29'},
+           { state: 'Star rating', date: '2025-05-10', rating: 3 }
         ]
     }
   ],
@@ -260,8 +287,7 @@ export class DashboardPage implements AfterViewInit, OnInit, OnDestroy {
       ],
       statusLog:[
           {state:'Offer posted',date:'2025-05-01'},
-          {state:'Offer accepted by the employee',date:'2025-05-02'},
-          { state: 'Star rating', date: '2025-05-10', rating: 4 }
+          {state:'Offer accepted by the employee',date:'2025-05-02'}
         ]
     },
     {
@@ -313,7 +339,7 @@ export class DashboardPage implements AfterViewInit, OnInit, OnDestroy {
 
   maxJobCount: number = 0;
 
-  constructor() {
+  constructor(private cd: ChangeDetectorRef) {
   addIcons({
     'people-circle-outline': peopleCircleOutline,
     'stats-chart-outline':   statsChartOutline,
@@ -337,10 +363,34 @@ getTotalPayment(worker: any): string {
   const total = worker.history.reduce((sum: number, task: any) => sum + parseFloat(task.payment.replace('$', '')), 0);
   return `$${total.toFixed(2)}`;
 }
+    onSectionChange(section: 'tenant'|'worker'|'orders') {
+    this.currentSection = section;   // keep ngModel happy
+    this.cd.detectChanges();
+    // give Angular one micro-tick so the new canvas is actually in the DOM
+  setTimeout(() => {
+    switch (section) {
+      case 'tenant':
+        this.createPopularJobsGraph();
+        this.createMostRequestedJobsGraph();
+        break;
+      case 'worker':
+        this.createStatusChart();
+        break;
+      case 'orders':
+        this.createOrdersGraph();
+        this.createTrendChart();
+        this.updateGoalProgress();
+        this.createMostRequestedJobsGraph();
+        break;
+    }
+  }, 0);
+}
+
 
   ngOnInit() {
   this.updateCurrentPopularJobs();
   this.updateMaxJobCount();
+  this.updateGoalProgress();
 }
 
 
@@ -349,6 +399,8 @@ getTotalPayment(worker: any): string {
       this.createOrdersGraph();
       this.createPopularJobsGraph();
       this.createMostRequestedJobsGraph();
+       this.createStatusChart();
+      this.createTrendChart();
     });
   }
 
@@ -356,6 +408,8 @@ getTotalPayment(worker: any): string {
     this.ordersChart?.destroy();
     this.popularJobsChart?.destroy();
     this.mostRequestedJobsChart?.destroy();
+     this.statusPie?.destroy();
+    this.trendChart?.destroy();
   }
 
   updateMaxJobCount() {
@@ -407,75 +461,57 @@ createOrdersGraph() {
   });
 }
 
-  createPopularJobsGraph() {
-    const ctx = this.popularJobsChartRef?.nativeElement.getContext('2d');
-    if (!ctx) return;
-    this.popularJobsChart?.destroy();
+ createPopularJobsGraph() {
+  const ctx = this.popularJobsChartRef.nativeElement.getContext('2d');
+  if (!ctx) return;
+  this.popularJobsChart?.destroy();
 
-    const allJobs = this.popularJobs[this.selectedSegment] || [];
+  // 1) Filtramos sólo las categorías de hotel
+  const hotelCats = ['hotel', 'cleaning', 'maintenance', 'security'];
+  const allJobs = (this.popularJobs[this.selectedSegment] || [])
+    .filter(j => hotelCats.includes(j.category));
 
-    // Unique job labels for X axis
-    const labels = Array.from(new Set(allJobs.map(job => job.job)));
+  // 2) Etiquetas únicas de trabajos
+  const labels = Array.from(new Set(allJobs.map(j => j.job)));
 
-    // Categories filtered by selectedArea
-    let categories: string[] = [];
-    if (this.selectedArea === 'all') {
-      categories = Array.from(new Set(allJobs.map(job => job.category)));
-    } else if (this.selectedArea === 'hotel') {
-      categories = ['hotel', 'cleaning', 'maintenance', 'security'];
-    } else if (this.selectedArea === 'casino') {
-      categories = ['casino', 'security'];
-    }
+  // 3) Preparamos un dataset por categoría
+  const datasets = hotelCats.map(cat => ({
+    label: cat.charAt(0).toUpperCase() + cat.slice(1),
+    data: labels.map(jobName => {
+      const job = allJobs.find(j => j.job === jobName && j.category === cat);
+      return job ? job.count : 0;
+    }),
+    backgroundColor: this.getJobHexColor(cat),
+    stack: 'a'
+  }));
 
-    const datasets = categories.map(category => {
-      const data = labels.map(label => {
-        const job = allJobs.find(j => j.job === label && j.category === category);
-        return job ? job.count : 0;
-      });
-
-      return {
-        label: category.charAt(0).toUpperCase() + category.slice(1),
-        data,
-        backgroundColor: this.getJobHexColor(category),
-        stack: 'Stack 0'
-      };
-    });
-
-    this.popularJobsChart = new Chart(ctx, {
-      type: 'bar',
-      data: { labels, datasets },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        scales: {
-          x: { stacked: true },
-          y: {
-            stacked: true,
-            beginAtZero: true,
-            ticks: {
-              precision: 0
-            }
-          }
-        },
-        plugins: {
-          legend: { position: 'top' },
-          tooltip: { enabled: true },
-          datalabels: {
-            color: 'white',
-            font: { weight: 'bold' },
-            formatter: (value: number, context) => {
-              const dataset = context.dataset.data as number[];
-              const total = dataset.reduce((a, b) => a + b, 0);
-              if (total === 0) return '';
-              const percent = ((value / total) * 100).toFixed(0);
-              return value > 0 && (value / total) > 0.05 ? `${percent}%` : '';
-            }
-          }
-        }
+  // 4) Creamos el chart apilado
+ this.popularJobsChart = new Chart(ctx, {
+  type: 'bar',
+  data:{ labels, datasets },
+  options:{
+    responsive: true,
+    maintainAspectRatio: false,
+    scales:{ x:{stacked:true}, y:{stacked:true,beginAtZero:true} },
+    plugins: {
+    legend: { position: 'top' },
+    datalabels: {
+      color: 'white',
+      font: { weight: 'bold' },
+      // sólo dibujo la etiqueta si existe y es > 0
+      display: (ctx: any) => {
+        const data = ctx.dataset?.data as number[] | undefined;
+        if (!Array.isArray(data)) return false;
+        return data[ctx.dataIndex] > 0;
       },
-      plugins: [ChartDataLabels]
-    });
+      formatter: (value: number) => value
+    }
   }
+  },
+  plugins:[ChartDataLabels]
+});
+}
+
 createMostRequestedJobsGraph() {
   const ctx = this.mostRequestedChartRef?.nativeElement.getContext('2d');
   if (!ctx) return;
@@ -545,16 +581,21 @@ createMostRequestedJobsGraph() {
   this.updateCurrentPopularJobs();
   this.updateMaxJobCount();
   this.createPopularJobsGraph();
+   this.updateGoalProgress();
+    this.createTrendChart();
 }
 
   // 3. Reemplazamos lógica para cargar actividades según periodo
   onWorkerSegmentChanged(event: CustomEvent) {
     this.selectedWorkerSegment = event.detail.value;
     this.workersActivity = this.workerActivitiesByPeriod[this.selectedWorkerSegment];
+     this.createStatusChart();
+  }
+ isDelayed(worker: WorkerActivity) {
+    return worker.status === 'in-progress';
   }
 
   onAreaChanged(event: CustomEvent) {
-    this.selectedArea = event.detail.value;
     this.createPopularJobsGraph();
   }
 
@@ -638,39 +679,55 @@ getProgressBarBorder(worker: WorkerActivity): string {
     return `0 4px 8px 0 ${c}`;
   }
 
-
-updateCurrentPopularJobs() {
-  const originalJobs = this.popularJobs[this.selectedSegment];
-  
-  let filteredJobs: PopularJob[];
-
-  if (this.selectedArea === 'hotel') {
-    filteredJobs = originalJobs.filter(j =>
-      ['hotel', 'cleaning', 'maintenance', 'security'].includes(j.category)
-    );
-  } else if (this.selectedArea === 'casino') {
-    filteredJobs = originalJobs.filter(j =>
-      ['casino', 'security'].includes(j.category)
-    );
-  } else {
-    filteredJobs = originalJobs;
+updateCurrentPopularJobs(){
+    const arr = this.popularJobs[this.selectedSegment]||[];
+    const group:{[k:string]:number} = {};
+    arr.forEach(j=>{
+      group[j.job] = (group[j.job]||0) + j.count;
+    });
+    this.currentPopularJobs = Object.entries(group)
+      .map(([job,count])=>({ job, count, category:'hotel' }));
   }
-
-  // Agrupar por nombre de trabajo
-  const grouped: Record<string, PopularJob> = {};
-  filteredJobs.forEach(job => {
-    if (!grouped[job.job]) {
-      grouped[job.job] = { job: job.job, count: 0, category: job.category };
-    }
-    grouped[job.job].count += job.count;
-  });
-
-  this.currentPopularJobs = Object.values(grouped);
-}
-
 getStarsArray(count: number): any[] {
   return Array(count);
 }
 
+ // ─── ORDERS Goals ───
+  updateGoalProgress() {
+    this.goalProgress = this.ordersFinished[this.selectedSegment] / this.goal;
+  }
+
+  createStatusChart() {
+    const ctx = this.statusPieRef.nativeElement.getContext('2d');
+    if (!ctx) return;
+    this.statusPie?.destroy();
+    const counts: Record<string, number> = {};
+    this.workersActivity.forEach(w => {
+      counts[w.status] = (counts[w.status] || 0) + 1;
+    });
+    const labels = Object.keys(counts);
+    const data = labels.map(l => counts[l]);
+    const bg = labels.map(l => this.getStatusColor(l as ActivityStatus));
+    this.statusPie = new Chart(ctx, {
+      type: 'pie',
+      data: { labels, datasets: [{ data, backgroundColor: bg }] },
+      options: { responsive: true, maintainAspectRatio: false }
+    });
+  }
+
+  createTrendChart() {
+    const ctx = this.trendLineRef.nativeElement.getContext('2d');
+    if (!ctx) return;
+    this.trendChart?.destroy();
+    const totals = this.days.map(d => {
+      const s = this.ordersByStatus[d];
+      return s.accepted + s.inProgress + s.notAccepted;
+    });
+    this.trendChart = new Chart(ctx, {
+      type: 'line',
+      data: { labels: this.days, datasets: [{ label: 'Total Orders', data: totals, fill: false, tension: 0.3 }] },
+      options: { responsive: true, maintainAspectRatio: false }
+    });
+  }
 
 }

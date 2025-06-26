@@ -40,29 +40,18 @@
   display: inline-block;
   transition: background-color 0.3s ease, color 0.3s ease;
 }
-
-.dashboard-icon.home-workers {
-  background-color: #ffc409;
-  color: black;
-}
-
-.dashboard-icon.workers {
-  background-color: #ff5722;
-}
-
-.dashboard-icon.orders {
-  background-color: #eb445a;
-}
+.dashboard-icon.home-workers { background-color: #ffc409; color: black; }
+.dashboard-icon.workers      { background-color: #ff5722; }
+.dashboard-icon.orders       { background-color: #eb445a; }
 
 ion-card {
   margin-bottom: 20px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
   border-radius: 10px;
   transition: box-shadow 0.3s ease;
 }
-
 ion-card:hover {
-  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 6px 15px rgba(0,0,0,0.2);
 }
 
 ion-item ion-icon {
@@ -81,6 +70,7 @@ ion-badge:hover {
   transform: scale(1.1);
 }
 
+/* Regla global para todos los ion-segment */
 ion-segment {
   margin: 10px 0;
   --indicator-color: #3880ff;
@@ -255,11 +245,10 @@ ion-accordion ion-item[slot="header"]:hover {
 
 /* =================== Star Rating =================== */
 ion-icon.star {
-  font-size: 1.2rem !important;       /* tu tamaño */
+  font-size: 1.2rem !important;
   margin-right: 4px !important;
-  color: #f1c40f !important;          /* fuerza currentColor */
+  color: #f1c40f !important;
 }
-
 
 /* =================== List Items =================== */
 ion-list ion-item {
@@ -272,7 +261,8 @@ ion-list ion-item:hover {
 }
 
 /* =================== Interactive Elements =================== */
-ion-segment-button, ion-badge {
+ion-segment-button,
+ion-badge {
   user-select: none;
   cursor: pointer;
 }
@@ -392,30 +382,193 @@ ion-badge.status-pending {
   }
 }
 
-@media screen and (max-width: 767px) {
-  .worker-card ion-card-title {
-    font-size: 1rem;
-  }
-  .worker-card p {
-    font-size: 0.8rem;
-  }
-  .worker-card ion-list-header {
-    font-size: 0.9rem;
-  }
-  /* =================== Status Log Images =================== */
-.status-images {
+/* 1) Aseguramos que el toolbar sea el contenedor POSITION-relative */
+ion-header ion-toolbar[color="primary"] {
+  position: relative;
+}
+
+/* 2) Sacamos el ion-segment del flujo normal y lo pegamos al fondo del toolbar */
+ion-header ion-toolbar[color="primary"] ion-segment.main-segment {
+  position: absolute !important;
+  bottom: 4px !important;
+  left:   16px !important;
+  right:  16px !important;
+  z-index: 50    !important;
+  /* ocultamos la pista gris */
+  --background: transparent !important;
+  border-radius: 9999px      !important;
+  padding:       4px 0       !important;
+}
+
+/* 3) Pintamos la “pastilla” blanca (el indicador) */
+ion-header ion-toolbar[color="primary"]
+  ion-segment.main-segment
+  ion-segment-button::part(indicator-background) {
+  background-color: #fff       !important;
+  height:           100%       !important;
+  border-radius:    9999px     !important;
+  transition:       var(--indicator-transition) !important;
+}
+
+/* 4) Botones inactivos: fondo transparente + texto semitransparente */
+ion-header ion-toolbar[color="primary"]
+  ion-segment.main-segment
+  ion-segment-button::part(native) {
+  background: transparent            !important;
+  color:      rgba(255,255,255,0.7)  !important;
+  border-radius: 9999px             !important;
+}
+
+/* 5) Botón activo: fondo blanco + texto negro */
+ion-header ion-toolbar[color="primary"]
+  ion-segment.main-segment
+  ion-segment-button.ion-activated::part(native) {
+  background: #fff !important;
+  color:      #000 !important;
+}
+
+// —— DASHBOARD NUEVAS SECCIONES ——
+
+// 1) KPI cards generales (Tenant)
+.kpi-cards {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 8px;
+  gap: 16px;
+  margin-bottom: 24px;
+
+  ion-card {
+    flex: 1 1 120px;
+    min-width: 120px;
+    text-align: center;
+
+    .dashboard-card-content {
+      padding: 16px 8px;
+
+      h2 {
+        margin: 8px 0 4px;
+        font-size: 1.1rem;
+      }
+      p {
+        margin: 0;
+        font-size: 0.9rem;
+        color: var(--ion-color-medium);
+      }
+    }
+  }
 }
 
-.status-images .thumb {
-  width: 60px;
-  height: 60px;
-  object-fit: cover;
-  border-radius: 4px;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+// 2) Barra de progreso de meta de órdenes (Orders)
+.goal-progress-container {
+  margin: 16px 0;
+
+  .goal-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.9rem;
+    margin-bottom: 4px;
+
+    span {
+      font-weight: bold;
+    }
+  }
+
+  ion-progress-bar {
+    height: 12px;
+    border-radius: 6px;
+    --background: var(--ion-color-light-shade);
+    --progress-background: var(--ion-color-success);
+  }
 }
 
+// 3) Trend Chart (Orders)
+.trend-chart-container {
+  width: 100%;
+  height: 250px;
+  margin-bottom: 24px;
+
+  canvas {
+    width: 100% !important;
+    height: 100% !important;
+  }
+}
+
+// 4) Worker KPIs (Tenant)
+.worker-kpis {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 16px;
+  margin: 24px 0;
+
+  .kpi-card {
+    ion-card {
+      text-align: center;
+      padding: 12px 0;
+
+      .kpi-value {
+        font-size: 1.4rem;
+        font-weight: bold;
+        margin-bottom: 4px;
+      }
+      .kpi-label {
+        font-size: 0.85rem;
+        color: var(--ion-color-medium);
+      }
+    }
+  }
+}
+
+// 5) Lista de “Next Tasks” (Tenant)
+.upcoming-tasks-list {
+  margin-top: 16px;
+
+  ion-list {
+    ion-item {
+      --inner-padding-start: 8px;
+      --inner-padding-end: 8px;
+
+      ion-label {
+        flex: 1;
+
+        .task-name {
+          font-weight: 500;
+        }
+        .task-time {
+          font-size: 0.8rem;
+          color: var(--ion-color-medium);
+        }
+      }
+      ion-badge {
+        font-size: 0.75rem;
+      }
+    }
+  }
+}
+
+// 6) Average Response Time (Tenant)
+.avg-response-time {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 24px 0;
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: var(--ion-color-primary);
+
+  ion-icon {
+    margin-right: 6px;
+    font-size: 1.4rem;
+  }
+}
+
+// Al final de tu dashboard.page.scss
+/* =================== Fix espaciado en Orders =================== */
+/* 1) Quita el margin-bottom de los cards de la fila de métricas */
+ion-row.orders-metrics ion-card {
+  margin-bottom: 0 !important;
+}
+
+/* 2) Asegúrate también de que la fila trend no meta espacio extra */
+ion-row.orders-trend {
+  margin-top: 0 !important;
+  margin-bottom: 16px; /* o el valor que quieras aquí */
 }

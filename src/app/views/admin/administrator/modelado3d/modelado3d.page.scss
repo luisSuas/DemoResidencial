@@ -1,20 +1,25 @@
-/** Quita paddings de Ionic y haz que el content llene toda la pantalla */
-ion-content.canvas-wrapper {
-  display: block;
-  position: relative;
-  height: 100%;
+.canvas-wrapper {
   --padding-top: 0;
   --padding-bottom: 0;
+  height: 100%;
 }
 
-/** El contenedor del canvas ocupa todo el ion-content */
-.canvas-container {
-  position: absolute;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  left: 0;
+/* Este wrapper controla el scroll vertical en toda la sección */
+.iframe-wrapper {
+  /* Ocupa todo el ancho disponible */
+  width: 100%;
+  /* Resta la altura del header, aquí suponemos 56px */
+  height: calc(100% - 56px);
+  /* Activa scroll cuando el contenido sobrepasa la altura */
+  overflow-y: auto;
+  /* Para quitar posibles márgenes internos */
+  padding: 0;
+}
+
+/* El iframe sigue llenando su contenedor */
+.iframe-wrapper iframe {
   width: 100%;
   height: 100%;
-  /* background: rgba(0,255,0,0.1); // Uncomment to debug */
+  border: none;
+  display: block;
 }
